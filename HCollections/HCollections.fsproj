@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Include="Unreachable.fs" />
+    <Compile Include="HList.fsi" />
     <Compile Include="HList.fs" />
+    <Compile Include="HListT.fsi" />
     <Compile Include="HListT.fs" />
+    <Compile Include="HListFolder.fsi" />
     <Compile Include="HListFolder.fs" />
+    <Compile Include="HUnion.fsi" />
     <Compile Include="HUnion.fs" />
   </ItemGroup>
 
