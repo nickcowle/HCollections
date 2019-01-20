@@ -24,8 +24,8 @@ module HList =
 
     let cons (x : 'a) (xs : 'b HList) =
         HList.Cons
-            { new HListConsCrate<'a -> 'b> with
-                member __.Apply e = e.Eval x xs Teq.refl<'a -> 'b>
+            { new HListConsCrate<_> with
+                member __.Apply e = e.Eval x xs Teq.refl
             }
 
     let rec length<'a> (xs : 'a HList) : int =
@@ -37,7 +37,7 @@ module HList =
                     member __.Eval _ xs _ = length xs + 1
                 }
 
-    let head<'a, 'b> (xs : ('a -> 'b) HList) : 'a =
+    let head (xs : ('a -> 'b) HList) : 'a =
         match xs with
         | Empty _ -> raise Unreachable
         | Cons b ->
@@ -48,7 +48,7 @@ module HList =
                         x |> Teq.castFrom teq
                 }
 
-    let tail<'a, 'b> (xs : ('a -> 'b) HList) : 'b HList =
+    let tail (xs : ('a -> 'b) HList) : 'b HList =
         match xs with
         | Empty _ -> raise Unreachable
         | Cons b ->
