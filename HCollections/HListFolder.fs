@@ -3,9 +3,9 @@
 [<RequireQualifiedAccess>]
 module HListFolder =
 
-    let makeGappedElementFolder (f : 's -> 'a option -> 's) : 's HListFolder =
+    let makeGappedElementFolder (f : 'state -> 'a option -> 'state) : 'state HListFolder =
         { new HListFolder<_> with
-            member __.F s (x : 'b) =
+            member __.Folder s (x : 'b) =
                 let v =
                     if typeof<'b> = typeof<'a> then
                         x |> unbox |> Some
@@ -14,6 +14,6 @@ module HListFolder =
                 f s v
         }
 
-    let makeElementFolder (f : 's -> 'a -> 's) : 's HListFolder =
+    let makeElementFolder (f : 'state -> 'a -> 'state) : 'state HListFolder =
         let g s o = match o with Some a -> f s a | None -> s
         makeGappedElementFolder g

@@ -2,25 +2,50 @@
 
 open TypeEquality
 
+/// HList is a heterogeneous list, that is a list where the types of the elements
+/// may all be different.
+///
+/// In order to be able to act on an HList in a type-safe way, we represent the types
+/// of each of the elements of the HList in its generic type parameter.
+///
+/// For example, the empty list has type: unit HList
+/// Whereas the HList containing an int and a string has type: (int -> string -> unit) HList
 [<NoComparison>]
 [<NoEquality>]
-type 'a HList
+type 'ts HList
 
-type 'a HListFolder =
-    abstract member F : 'a -> 'b -> 'a
+/// HListFolder allows you to perform a fold over an HList.
+/// The single type parameter, 'state, denotes the type of the value
+/// that you want the fold to return.
+type 'state HListFolder =
+
+    /// F takes the current state, the next element in the HList and returns a new state.
+    /// Because elements in the HList may have arbitrary type, F must be generic on
+    /// the element type, i.e. can be called for any element type.
+    abstract member Folder<'a> : 'state -> 'a -> 'state
 
 module HList =
 
-    val cong : Teq<'a, 'b> -> Teq<'a HList, 'b HList>
+    /// Congruence proof for HLists - given a proof of equality between two types 'ts1 and 'ts2,
+    /// returns a proof that 'ts1 HList and 'ts2 HList are the same type.
+    val cong : Teq<'ts1, 'ts2> -> Teq<'ts1 HList, 'ts2 HList>
 
+    /// The unique empty HList
     val empty : unit HList
 
-    val cons : 'a -> 'b HList -> ('a -> 'b) HList
+    /// Given an element and an HList, returns a new HList with the element prepended to it.
+    val cons : 'a -> 'ts HList -> ('a -> 'ts) HList
 
-    val length : 'a HList -> int
+    /// Returns the length of the given HList
+    val length : 'ts HList -> int
 
-    val head : ('a -> 'b) HList -> 'a
+    /// Given a non-empty HList, returns the first element.
+    val head : ('t -> 'ts) HList -> 't
 
-    val tail : ('a -> 'b) HList -> 'b HList
+    /// Given a non-empty HList, returns a new HList containing all of the elements
+    /// except the head.
+    val tail : ('t -> 'ts) HList -> 'ts HList
 
-    val fold : 'a HListFolder -> 'a -> 'b HList -> 'a
+    /// Given an HListFolder, an initial state and an HList, returns the result
+    /// of folding the HListFolder over the elements of the HList.
+    val fold : 'state HListFolder -> seed:'state -> 'ts HList -> 'state

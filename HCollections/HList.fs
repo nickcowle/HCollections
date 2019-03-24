@@ -4,31 +4,34 @@ open TypeEquality
 
 [<NoComparison>]
 [<NoEquality>]
-type 'a HList =
+type 'ts HList =
     private
-    | Empty of Teq<'a, unit>
-    | Cons of 'a HListConsCrate
+    | Empty of Teq<'ts, unit>
+    | Cons of 'ts HListConsCrate
 
-and private 'a HListConsCrate = abstract member Apply : HListConsEvaluator<'a, 'ret> -> 'ret
-and private HListConsEvaluator<'a, 'ret> = abstract member Eval : 'b -> 'c HList -> Teq<'a, 'b -> 'c> -> 'ret
+and private HListConsEvaluator<'ts, 'ret> =
+    abstract member Eval<'t, 'ts2> : 't -> 'ts2 HList -> Teq<'ts, 't -> 'ts2> -> 'ret
 
-type 'a HListFolder =
-    abstract member F : 'a -> 'b -> 'a
+and private 'ts HListConsCrate =
+    abstract member Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
+
+type 'state HListFolder =
+    abstract member Folder<'a> : 'state -> 'a -> 'state
 
 module HList =
 
-    let cong (teq : Teq<'a, 'b>) : Teq<'a HList, 'b HList> =
+    let cong (teq : Teq<'ts1, 'ts2>) : Teq<'ts1 HList, 'ts2 HList> =
         Teq.Cong.believeMe teq
 
     let empty = HList.Empty Teq.refl
 
-    let cons (x : 'a) (xs : 'b HList) =
+    let cons (x : 'a) (xs : 'ts HList) =
         HList.Cons
             { new HListConsCrate<_> with
                 member __.Apply e = e.Eval x xs Teq.refl
             }
 
-    let rec length<'a> (xs : 'a HList) : int =
+    let rec length<'ts> (xs : 'ts HList) : int =
         match xs with
         | Empty _ -> 0
         | Cons b ->
@@ -37,7 +40,7 @@ module HList =
                     member __.Eval _ xs _ = length xs + 1
                 }
 
-    let head (xs : ('a -> 'b) HList) : 'a =
+    let head (xs : ('t -> 'ts) HList) : 't =
         match xs with
         | Empty _ -> raise Unreachable
         | Cons b ->
@@ -48,7 +51,7 @@ module HList =
                         x |> Teq.castFrom teq
                 }
 
-    let tail (xs : ('a -> 'b) HList) : 'b HList =
+    let tail (xs : ('t -> 'ts) HList) : 'ts HList =
         match xs with
         | Empty _ -> raise Unreachable
         | Cons b ->
@@ -59,11 +62,11 @@ module HList =
                         xs |> Teq.castFrom teq
                 }
 
-    let rec fold<'a, 'b> (folder : 'a HListFolder) (s : 'a) (xs : 'b HList) : 'a =
+    let rec fold<'state, 'ts> (folder : 'state HListFolder) (seed : 'state) (xs : 'ts HList) : 'state =
         match xs with
-        | Empty _ -> s
+        | Empty _ -> seed
         | Cons c ->
             c.Apply
                 { new HListConsEvaluator<_,_> with
-                    member __.Eval x xs teq = fold folder (folder.F s x) xs
+                    member __.Eval x xs teq = fold folder (folder.Folder seed x) xs
                 }
