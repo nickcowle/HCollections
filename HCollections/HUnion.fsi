@@ -64,3 +64,6 @@ module HUnion =
     /// 'ts HUnion in the case where the value of the union corresponds to one of the
     /// choices denoted by 'ts.
     val split : ('t -> 'ts) HUnion -> Choice<'t, 'ts HUnion>
+
+    /// Given an HUnion that contains only a single case, returns the value of that case.
+    val getSingleton : ('t -> unit) HUnion -> 't

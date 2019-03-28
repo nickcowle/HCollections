@@ -78,3 +78,14 @@ module HUnion =
                     member __.Eval union teq =
                         union |> Teq.castFrom (teq |> Teq.Cong.rangeOf |> cong) |> Choice2Of2
                 }
+
+    let getSingleton (union : ('t -> unit) HUnion) : 't =
+        match union with
+        | Value c ->
+            c.Apply
+                { new HUnionValueEvaluator<_,_> with
+                    member __.Eval v _ teq =
+                        v |> Teq.castFrom (Teq.Cong.domainOf teq)
+                }
+        | Extended _ ->
+            raise Unreachable
