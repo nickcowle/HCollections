@@ -64,3 +64,22 @@ module HUnion =
                 }
         | Extended _ ->
             raise Unreachable
+
+    let rec toTypeList<'ts> (union : 'ts HUnion) : 'ts TypeList =
+        match union with
+        | Value c ->
+            c.Apply
+                { new HUnionValueEvaluator<_,_> with
+                    member __.Eval _ ts teq =
+                        ts
+                        |> TypeList.cons
+                        |> Teq.castFrom (TypeList.cong teq)
+                }
+        | Extended c ->
+            c.Apply
+                { new HUnionExtendedEvaluator<_,_> with
+                    member __.Eval union teq =
+                        toTypeList union
+                        |> TypeList.cons
+                        |> Teq.castFrom (TypeList.cong teq)
+                }

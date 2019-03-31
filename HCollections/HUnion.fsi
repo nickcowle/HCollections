@@ -41,3 +41,7 @@ module HUnion =
 
     /// Given an HUnion that contains only a single case, returns the value of that case.
     val getSingleton : ('t -> unit) HUnion -> 't
+
+    /// Given an HUnion, returns a TypeList whose types correspond to the
+    /// cases of the HUnion.
+    val toTypeList : 'ts HUnion -> 'ts TypeList
