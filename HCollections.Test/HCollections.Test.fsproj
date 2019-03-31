@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Compile Include="TestHUnion.fs" />
+    <Compile Include="TestSumOfProducts.fs" />
   </ItemGroup>
 
   <ItemGroup>

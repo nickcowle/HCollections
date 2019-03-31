@@ -26,6 +26,10 @@
     <Compile Include="TypeList.fs" />
     <Compile Include="HUnion.fsi" />
     <Compile Include="HUnion.fs" />
+    <Compile Include="TypeListList.fsi" />
+    <Compile Include="TypeListList.fs" />
+    <Compile Include="SumOfProducts.fsi" />
+    <Compile Include="SumOfProducts.fs" />
   </ItemGroup>
 
   <ItemGroup>
