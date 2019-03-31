@@ -22,6 +22,8 @@
     <Compile Include="HListT.fs" />
     <Compile Include="HListFolder.fsi" />
     <Compile Include="HListFolder.fs" />
+    <Compile Include="TypeList.fsi" />
+    <Compile Include="TypeList.fs" />
     <Compile Include="HUnion.fsi" />
     <Compile Include="HUnion.fs" />
   </ItemGroup>

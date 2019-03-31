@@ -5,7 +5,7 @@ open Xunit
 
 module TestHUnion =
 
-    let testUnion = HUnion.make HUnionTail.empty 1234
+    let testUnion = HUnion.make TypeList.empty 1234
 
     [<Fact>]
     let ``Splitting an HUnion that hasn't been extended returns the value of the union`` () =

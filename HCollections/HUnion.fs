@@ -4,38 +4,13 @@ open TypeEquality
 
 [<NoComparison>]
 [<NoEquality>]
-type 'ts HUnionTail =
-    private
-    | Empty of Teq<'ts, unit>
-    | Extended of 'ts HUnionTailExtendedCrate
-
-and private HUnionTailExtendedEvaluator<'ts, 'ret> =
-    abstract member Eval<'t, 'ts2> : 'ts2 HUnionTail -> Teq<'ts, 't -> 'ts2> -> 'ret
-
-and private 'ts HUnionTailExtendedCrate =
-    abstract member Apply<'ret> : HUnionTailExtendedEvaluator<'ts, 'ret> -> 'ret
-
-[<RequireQualifiedAccess>]
-module HUnionTail =
-
-    let empty = Empty Teq.refl
-
-    let extend<'ts, 't> (tail : 'ts HUnionTail) =
-        { new HUnionTailExtendedCrate<_> with
-            member __.Apply e = e.Eval tail Teq.refl<'t -> 'ts>
-        }
-        |> Extended
-
-
-[<NoComparison>]
-[<NoEquality>]
 type 'ts HUnion =
     private
     | Value of 'ts HUnionValueCrate
     | Extended of 'ts HUnionExtendedCrate
 
 and private HUnionValueEvaluator<'ts, 'ret> =
-    abstract member Eval<'t, 'ts2> : 't -> 'ts2 HUnionTail -> Teq<'ts, 't -> 'ts2> -> 'ret
+    abstract member Eval<'t, 'ts2> : 't -> 'ts2 TypeList -> Teq<'ts, 't -> 'ts2> -> 'ret
 
 and private 'ts HUnionValueCrate =
     abstract member Apply<'ret> : HUnionValueEvaluator<'ts, 'ret> -> 'ret
@@ -52,9 +27,9 @@ module HUnion =
     let cong (teq : Teq<'ts1, 'ts2>) : Teq<'ts1 HUnion, 'ts2 HUnion> =
         Teq.Cong.believeMe teq
 
-    let make tail value =
+    let make types value =
         { new HUnionValueCrate<_> with
-            member __.Apply e = e.Eval value tail Teq.refl
+            member __.Apply e = e.Eval value types Teq.refl
         }
         |> Value
 
