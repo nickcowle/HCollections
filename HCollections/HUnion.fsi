@@ -31,7 +31,7 @@ module HUnionTail =
 /// HUnion is a heterogeneous union type, that is a generic way of
 /// representing choice types.
 ///
-/// We the types of each of the cases in the union in the single generic
+/// We represent the types of each of the cases in the union in the single generic
 /// type parameter of HUnion.
 ///
 /// For example, if we want to represent the choice type int or string
