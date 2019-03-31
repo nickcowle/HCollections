@@ -25,7 +25,7 @@ module HListT =
 
     let empty<'elem> : HListT<unit, 'elem> = HListT.Empty Teq.refl
 
-    let cons (x : 'a) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
+    let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
         HListT.Cons
             { new HListTConsCrate<_, _> with
                 member __.Apply e = e.Eval x elem xs Teq.refl
@@ -62,7 +62,7 @@ module HListT =
                         xs |> Teq.castFrom teq
                 }
 
-    let rec fold<'state, 'elem, 'a> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'a, 'elem>) : 'state =
+    let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
         | Empty _ -> seed
         | Cons c ->

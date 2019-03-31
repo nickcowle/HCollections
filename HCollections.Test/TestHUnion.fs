@@ -19,7 +19,7 @@ module TestHUnion =
 
         let union =
             testUnion
-            |> HUnion.extend<_, string>
+            |> HUnion.extend<string, _>
 
         match union |> HUnion.split with
         | Choice1Of2 _ -> Assert.True false

@@ -27,13 +27,13 @@ module HUnion =
     let cong (teq : Teq<'ts1, 'ts2>) : Teq<'ts1 HUnion, 'ts2 HUnion> =
         Teq.Cong.believeMe teq
 
-    let make types value =
+    let make<'t, 'ts> (types : 'ts TypeList) (value : 't) =
         { new HUnionValueCrate<_> with
             member __.Apply e = e.Eval value types Teq.refl
         }
         |> Value
 
-    let extend<'ts, 't> (union : 'ts HUnion) =
+    let extend<'t, 'ts> (union : 'ts HUnion) =
         { new HUnionExtendedCrate<_> with
             member __.Apply e = e.Eval union Teq.refl<'t -> 'ts>
         }

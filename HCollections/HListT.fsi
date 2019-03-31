@@ -42,18 +42,18 @@ module HListT =
 
     /// Given an element of any type, an element of type 'elem and an HListT with element type 'elem,
     /// returns a new HListT with the elements prepended to it.
-    val cons : 'a -> 'elem -> HListT<'ts, 'elem> -> HListT<'a -> 'ts, 'elem>
+    val cons<'t, 'ts, 'elem> : 't -> 'elem -> HListT<'ts, 'elem> -> HListT<'t -> 'ts, 'elem>
 
     /// Returns the length of the given HListT
-    val length : HListT<'ts, 'elem> -> int
+    val length<'ts, 'elem> : HListT<'ts, 'elem> -> int
 
     /// Given a non-empty HListT, returns the first pair of elements.
-    val head : HListT<'t -> 'ts, 'elem> -> 't * 'elem
+    val head<'t, 'ts, 'elem> : HListT<'t -> 'ts, 'elem> -> 't * 'elem
 
     /// Given a non-empty HListT, returns a new HListT containing all of the elements
     /// except the first pair.
-    val tail : HListT<'t -> 'ts, 'elem> -> HListT<'ts, 'elem>
+    val tail<'t, 'ts, 'elem> : HListT<'t -> 'ts, 'elem> -> HListT<'ts, 'elem>
 
     /// Given an HListTFolder, an initial state and an HListT, returns the result
     /// of folding the HListTFolder over the elements of the HListT.
-    val fold  : HListTFolder<'state, 'elem> -> seed:'state -> HListT<'ts, 'elem> -> 'state
+    val fold<'state, 'ts, 'elem> : HListTFolder<'state, 'elem> -> seed:'state -> HListT<'ts, 'elem> -> 'state

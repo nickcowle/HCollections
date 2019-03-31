@@ -25,7 +25,7 @@ module HList =
 
     let empty = HList.Empty Teq.refl
 
-    let cons (x : 'a) (xs : 'ts HList) =
+    let cons (x : 't) (xs : 'ts HList) =
         HList.Cons
             { new HListConsCrate<_> with
                 member __.Apply e = e.Eval x xs Teq.refl

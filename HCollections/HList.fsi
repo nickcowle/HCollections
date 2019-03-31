@@ -34,18 +34,18 @@ module HList =
     val empty : unit HList
 
     /// Given an element and an HList, returns a new HList with the element prepended to it.
-    val cons : 'a -> 'ts HList -> ('a -> 'ts) HList
+    val cons<'t, 'ts> : 't -> 'ts HList -> ('t -> 'ts) HList
 
     /// Returns the length of the given HList
-    val length : 'ts HList -> int
+    val length<'ts> : 'ts HList -> int
 
     /// Given a non-empty HList, returns the first element.
-    val head : ('t -> 'ts) HList -> 't
+    val head<'t, 'ts> : ('t -> 'ts) HList -> 't
 
     /// Given a non-empty HList, returns a new HList containing all of the elements
     /// except the head.
-    val tail : ('t -> 'ts) HList -> 'ts HList
+    val tail<'t, 'ts> : ('t -> 'ts) HList -> 'ts HList
 
     /// Given an HListFolder, an initial state and an HList, returns the result
     /// of folding the HListFolder over the elements of the HList.
-    val fold : 'state HListFolder -> seed:'state -> 'ts HList -> 'state
+    val fold<'state, 'ts> : 'state HListFolder -> seed:'state -> 'ts HList -> 'state
