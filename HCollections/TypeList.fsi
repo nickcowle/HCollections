@@ -1,5 +1,7 @@
 ﻿namespace HCollections
 
+open TypeEquality
+
 /// TypeList is a type-level list of types.
 ///
 /// We represent the list of types using the single type parameter.
@@ -13,6 +15,10 @@ type 'ts TypeList
 
 [<RequireQualifiedAccess>]
 module TypeList =
+
+    /// Congruence proof for TypeLists - given a proof of equality between two types 'ts1 and 'ts2,
+    /// returns a proof that 'ts1 TypeList and 'ts2 TypeList are the same type.
+    val cong : Teq<'ts1, 'ts2> -> Teq<'ts1 TypeList, 'ts2 TypeList>
 
     /// The unique empty TypeList
     val empty : unit TypeList

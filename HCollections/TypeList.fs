@@ -18,6 +18,9 @@ and private 'ts TypeListConsCrate =
 [<RequireQualifiedAccess>]
 module TypeList =
 
+    let cong (teq : Teq<'ts1, 'ts2>) : Teq<'ts1 TypeList, 'ts2 TypeList> =
+        Teq.Cong.believeMe teq
+
     let empty = Empty Teq.refl
 
     let cons<'t, 'ts> (types : 'ts TypeList) =

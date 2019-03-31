@@ -70,3 +70,17 @@ module HList =
                 { new HListConsEvaluator<_,_> with
                     member __.Eval x xs teq = fold folder (folder.Folder seed x) xs
                 }
+
+    let rec toTypeList<'ts> (xs : 'ts HList) : 'ts TypeList =
+        match xs with
+        | Empty teq ->
+            TypeList.empty |> Teq.castFrom (teq |> TypeList.cong)
+        | Cons b ->
+            b.Apply
+                { new HListConsEvaluator<_,_> with
+                    member __.Eval (_ : 'a) xs teq =
+                        let teq = teq |> TypeList.cong
+                        xs
+                        |> toTypeList |> TypeList.cons<'a, _>
+                        |> Teq.castFrom teq
+                }
