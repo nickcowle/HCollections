@@ -1,5 +1,6 @@
 ﻿namespace HCollections
 
+open System
 open TypeEquality
 
 /// TypeList is a type-level list of types.
@@ -12,6 +13,13 @@ open TypeEquality
 [<NoComparison>]
 [<NoEquality>]
 type 'ts TypeList
+
+type TypeListConsEvaluator<'ts, 'ret> =
+    abstract member Eval<'t, 'ts2> : 'ts2 TypeList -> Teq<'ts, 't -> 'ts2> -> 'ret
+
+and 'ts TypeListConsCrate =
+    abstract member Apply<'ret> : TypeListConsEvaluator<'ts, 'ret> -> 'ret
+
 
 [<RequireQualifiedAccess>]
 module TypeList =
@@ -26,3 +34,14 @@ module TypeList =
     /// Given an TypeList, prepends a new type
     /// to the list of types being represented.
     val cons<'t, 'ts> : 'ts TypeList -> ('t -> 'ts) TypeList
+
+    /// Given a non-empty TypeList, returns a new TypeList containing all of the elements
+    /// except the head.
+    val tail<'t, 'ts> : ('t -> 'ts) TypeList -> 'ts TypeList
+
+    /// Given a TypeList, returns either a proof that the list is empty, or a crate
+    /// containing the tail of the TypeList.
+    val split : 'ts TypeList -> Choice<Teq<'ts, unit>, 'ts TypeListConsCrate>
+
+    /// Given a TypeList, returns the corresponding list of runtime types.
+    val toTypes : 'ts TypeList -> Type list

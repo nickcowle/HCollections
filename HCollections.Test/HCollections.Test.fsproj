@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestTypeList.fs" />
     <Compile Include="TestHUnion.fs" />
     <Compile Include="TestSumOfProducts.fs" />
   </ItemGroup>
