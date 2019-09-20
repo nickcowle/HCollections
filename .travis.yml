@@ -1,8 +1,8 @@
 language: csharp
-	solution: TeqCrate.sln
-	
-	dotnet: 2.2.105
-	
-	script:
-	    - dotnet restore
-	    - dotnet test
+solution: HCollections.sln
+
+dotnet: 2.2.105
+
+script:
+    - dotnet restore
+    - dotnet test
