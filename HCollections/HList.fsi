@@ -36,7 +36,8 @@ module HList =
     /// Given an element and an HList, returns a new HList with the element prepended to it.
     val cons<'t, 'ts> : 't -> 'ts HList -> ('t -> 'ts) HList
 
-    /// Returns the length of the given HList
+    /// Returns the length of the given HList.
+    /// This operation takes time constant in the length of the HList.
     val length<'ts> : 'ts HList -> int
 
     /// Given a non-empty HList, returns the first element.

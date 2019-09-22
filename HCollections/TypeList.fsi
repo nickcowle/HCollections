@@ -15,10 +15,10 @@ open TypeEquality
 type 'ts TypeList
 
 type TypeListConsEvaluator<'ts, 'ret> =
-    abstract member Eval<'t, 'ts2> : 'ts2 TypeList -> Teq<'ts, 't -> 'ts2> -> 'ret
+    abstract Eval<'t, 'ts2> : 'ts2 TypeList -> Teq<'ts, 't -> 'ts2> -> 'ret
 
 and 'ts TypeListConsCrate =
-    abstract member Apply<'ret> : TypeListConsEvaluator<'ts, 'ret> -> 'ret
+    abstract Apply<'ret> : TypeListConsEvaluator<'ts, 'ret> -> 'ret
 
 
 [<RequireQualifiedAccess>]
@@ -45,3 +45,8 @@ module TypeList =
 
     /// Given a TypeList, returns the corresponding list of runtime types.
     val toTypes : 'ts TypeList -> Type list
+
+    /// Given a TypeList, returns the length of the list.
+    /// This is equal to the number of `cons` operations on `empty` that would create the list.
+    /// This operation takes time constant in the length of the TypeList.
+    val length : 'ts TypeList -> int

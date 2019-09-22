@@ -7,7 +7,7 @@ open TypeEquality
 type HListT<'ts, 'elem> =
     private
     | Empty of Teq<'ts, unit>
-    | Cons of HListTConsCrate<'ts, 'elem>
+    | Cons of HListTConsCrate<'ts, 'elem> * length : int
 
 and private HListTConsEvaluator<'ts, 'elem, 'ret> =
     abstract member Eval<'t, 'ts2> : 't -> 'elem -> HListT<'ts2, 'elem> -> Teq<'ts, 't -> 'ts2> -> 'ret
@@ -25,25 +25,24 @@ module HListT =
 
     let empty<'elem> : HListT<unit, 'elem> = HListT.Empty Teq.refl
 
-    let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
-        HListT.Cons
-            { new HListTConsCrate<_, _> with
-                member __.Apply e = e.Eval x elem xs Teq.refl
-            }
-
     let rec length<'ts, 'elem> (xs : HListT<'ts, 'elem>) : int =
         match xs with
         | Empty _ -> 0
-        | Cons b ->
-            b.Apply
-                { new HListTConsEvaluator<_,_,_> with
-                    member __.Eval _ _ xs _ = length xs + 1
-                }
+        | Cons (_, length) -> length
+
+    let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
+        let crate =
+            { new HListTConsCrate<_, _> with
+                member __.Apply e = e.Eval x elem xs Teq.refl
+            }
+        let length = 1 + length xs
+
+        HListT.Cons (crate, length)
 
     let head (xs : HListT<'t -> 'ts, 'elem>) : 't * 'elem =
         match xs with
         | Empty _ -> raise Unreachable
-        | Cons b ->
+        | Cons (b, _length) ->
             b.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval x y _ teq =
@@ -54,7 +53,7 @@ module HListT =
     let tail (xs : HListT<'t -> 'ts, 'elem>) : HListT<'ts, 'elem> =
         match xs with
         | Empty _ -> raise Unreachable
-        | Cons b ->
+        | Cons (b, _length) ->
             b.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval _ _ xs teq =
@@ -65,7 +64,7 @@ module HListT =
     let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
         | Empty _ -> seed
-        | Cons c ->
+        | Cons (c, _length) ->
             c.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval x y xs _ = fold folder (folder.Folder seed x y) xs
