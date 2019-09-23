@@ -1,5 +1,6 @@
 namespace HCollections.Test
 
+open System
 open HCollections
 open Xunit
 
@@ -35,8 +36,12 @@ module TestHUnion =
     let ``toTypeList is correct on a union of size 1`` () =
     
         let union = testUnion
-        let expected : TypeList<int -> unit> = TypeList.empty |> TypeList.cons
-        Assert.Equal(expected, HUnion.toTypeList union)
+        let expected =
+            TypeList.empty
+            |> TypeList.cons<int, _>
+            |> TypeList.toTypes
+
+        Assert.Equal<Type list>(expected, HUnion.toTypeList union |> TypeList.toTypes)
 
     [<Fact>]
     let ``toTypeList is correct on a bigger union`` () =
@@ -53,6 +58,7 @@ module TestHUnion =
             |> TypeList.cons
             |> TypeList.cons
             |> TypeList.cons
+        let expected = expected |> TypeList.toTypes
 
-        Assert.Equal(expected, HUnion.toTypeList union)
+        Assert.Equal<Type list>(expected, HUnion.toTypeList union |> TypeList.toTypes)
 

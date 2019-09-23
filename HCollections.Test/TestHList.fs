@@ -17,7 +17,7 @@ module TestHList =
     let ``HList to type list is correct for an HList of size 1`` () =
         let testHlist = HList.empty |> HList.cons 300
 
-        Assert.Equal (TypeList.empty |> TypeList.cons<int, _>, HList.toTypeList testHlist)
+        Assert.Equal<Type list> (TypeList.empty |> TypeList.cons<int, _> |> TypeList.toTypes, HList.toTypeList testHlist |> TypeList.toTypes)
 
     [<Fact>]
     let ``HList to type list is correct for an HList of size 4`` () =
@@ -35,4 +35,4 @@ module TestHList =
             |> TypeList.cons<int, _>
             |> TypeList.cons<float, _>
 
-        Assert.Equal (expected, HList.toTypeList hlist)
+        Assert.Equal<Type list> (TypeList.toTypes expected, HList.toTypeList hlist |> TypeList.toTypes)
