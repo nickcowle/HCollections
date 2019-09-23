@@ -7,7 +7,7 @@ open TypeEquality
 type HListT<'ts, 'elem> =
     private
     | Empty of Teq<'ts, unit>
-    | Cons of HListTConsCrate<'ts, 'elem> * length : int
+    | Cons of HListTConsCrate<'ts, 'elem> * 'ts TypeList
 
 and private HListTConsEvaluator<'ts, 'elem, 'ret> =
     abstract member Eval<'t, 'ts2> : 't -> 'elem -> HListT<'ts2, 'elem> -> Teq<'ts, 't -> 'ts2> -> 'ret
@@ -23,21 +23,31 @@ module HListT =
     let cong (teq1 : Teq<'ts1, 'ts2>) (_ : Teq<'elem1, 'elem2>) : Teq<HListT<'ts1, 'elem1>, HListT<'ts2, 'elem2>> =
         Teq.Cong.believeMe teq1
 
+    let toTypeList<'ts, 'elem> (list : HListT<'ts, 'elem>) : 'ts TypeList =
+        match list with
+        | Empty teq ->
+            TypeList.empty
+            |> Teq.castFrom (TypeList.cong teq)
+        | Cons (_, tl) -> tl
+
     let empty<'elem> : HListT<unit, 'elem> = HListT.Empty Teq.refl
 
     let length<'ts, 'elem> (xs : HListT<'ts, 'elem>) : int =
         match xs with
         | Empty _ -> 0
-        | Cons (_, length) -> length
+        | Cons (_, tl) -> TypeList.length tl
 
     let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
         let crate =
             { new HListTConsCrate<_, _> with
                 member __.Apply e = e.Eval x elem xs Teq.refl
             }
-        let length = 1 + length xs
+        let tl =
+            xs
+            |> toTypeList
+            |> TypeList.cons<'t, _>
 
-        HListT.Cons (crate, length)
+        HListT.Cons (crate, tl)
 
     let head (xs : HListT<'t -> 'ts, 'elem>) : 't * 'elem =
         match xs with
