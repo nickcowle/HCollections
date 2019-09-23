@@ -71,8 +71,27 @@ module HListT =
                         xs |> Teq.castFrom teq
                 }
 
-    let toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
-        failwith "todo"
+    let rec private toHList'<'ts, 'elem, 'k>
+        (input : HListT<'ts, 'elem>)
+        (cont : 'ts HList -> 'k)
+        : 'k
+        =
+        match input with
+        | HListT.Empty t -> HList.empty |> Teq.castFrom (HList.cong t) |> cont
+        | HListT.Cons (c,_) ->
+            c.Apply
+                { new HListTConsEvaluator<_,_,_> with
+                    member __.Eval<'t, 't2> (t : 't) _ (cons : HListT<'t2, 'elem>) teq =
+                        toHList'<'t2, 'elem, 'k>
+                            cons
+                            (fun ts ->
+                                HList.cons t ts
+                                |> Teq.castFrom (HList.cong teq)
+                                |> cont)
+                }
+
+    let rec toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
+        toHList'<'ts, 'elem, 'ts HList> input id
 
     let rec private toList'<'ts, 'elem, 'k>
         (current : HListT<'ts, 'elem>)
@@ -84,7 +103,7 @@ module HListT =
         | HListT.Cons (c, _) ->
             c.Apply
                 { new HListTConsEvaluator<_,_,_> with
-                    member __.Eval<'t, 't2> (_t : 't) v (cons : HListT<'t2, 'elem>) teq =
+                    member __.Eval<'t, 't2> (_ : 't) v (cons : HListT<'t2, 'elem>) teq =
                         toList'<'t2, 'elem, 'k> cons (fun vs -> v :: vs |> cont)
                 }
 
