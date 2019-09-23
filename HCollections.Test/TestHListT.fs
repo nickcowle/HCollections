@@ -45,3 +45,9 @@ module TestHListT =
             |> HListT.toList
 
         Assert.Equal<int list> ([10; 4], testHList)
+
+    [<Fact>]
+    let ``HList.toList on an empty HListT returns an empty list`` () =
+        let testList = HListT.toList HListT.empty<int>
+
+        Assert.Equal<int list> ([], testList)

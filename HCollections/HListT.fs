@@ -74,18 +74,22 @@ module HListT =
     let toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
         failwith "todo"
 
-    let rec private toList'<'ts, 'elem> (current : HListT<'ts, 'elem>) (acc : 'elem list) : 'elem list =
+    let rec private toList'<'ts, 'elem, 'k>
+        (current : HListT<'ts, 'elem>)
+        (cont : 'elem list -> 'k)
+        : 'k
+        =
         match current with
-        | HListT.Empty _ -> List.rev acc
+        | HListT.Empty _ -> cont []
         | HListT.Cons (c, _) ->
             c.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval<'t, 't2> (_t : 't) v (cons : HListT<'t2, 'elem>) teq =
-                        toList'<'t2, 'elem> cons (v :: acc)
+                        toList'<'t2, 'elem, 'k> cons (fun vs -> v :: vs |> cont)
                 }
 
     let toList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'elem list =
-        toList'<'ts, 'elem> input []
+        toList'<'ts, 'elem, 'elem list> input id
 
     let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
