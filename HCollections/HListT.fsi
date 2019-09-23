@@ -55,6 +55,12 @@ module HListT =
     /// except the first pair.
     val tail<'t, 'ts, 'elem> : HListT<'t -> 'ts, 'elem> -> HListT<'ts, 'elem>
 
+    /// Given an HListT, returns the HList component
+    val toHList<'ts, 'elem> : HListT<'ts, 'elem> -> 'ts HList
+
+    /// Given an HListT, returns the list of elems.
+    val toList<'ts, 'elem> : HListT<'ts, 'elem> -> 'elem list
+
     /// Given an HListTFolder, an initial state and an HListT, returns the result
     /// of folding the HListTFolder over the elements of the HListT.
     val fold<'state, 'ts, 'elem> : HListTFolder<'state, 'elem> -> seed:'state -> HListT<'ts, 'elem> -> 'state

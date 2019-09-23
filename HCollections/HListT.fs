@@ -71,6 +71,22 @@ module HListT =
                         xs |> Teq.castFrom teq
                 }
 
+    let toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
+        failwith "todo"
+
+    let rec private toList'<'ts, 'elem> (current : HListT<'ts, 'elem>) (acc : 'elem list) : 'elem list =
+        match current with
+        | HListT.Empty _ -> List.rev acc
+        | HListT.Cons (c, _) ->
+            c.Apply
+                { new HListTConsEvaluator<_,_,_> with
+                    member __.Eval<'t, 't2> (_t : 't) v (cons : HListT<'t2, 'elem>) teq =
+                        toList'<'t2, 'elem> cons (v :: acc)
+                }
+
+    let toList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'elem list =
+        toList'<'ts, 'elem> input []
+
     let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
         | Empty _ -> seed

@@ -35,3 +35,13 @@ module TestHListT =
             |> HListT.cons 4.5 10
 
         Assert.Equal (2, HListT.length testHlist)
+
+    [<Fact>]
+    let ``Hlist.tolist returns the correct list`` () =
+        let testHList =
+            HListT.empty<int>
+            |> HListT.cons "hi" 4
+            |> HListT.cons 4.5 10
+            |> HListT.toList
+
+        Assert.Equal<int list> ([10; 4], testHList)
