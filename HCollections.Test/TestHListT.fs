@@ -51,7 +51,6 @@ module TestHListT =
 
         Assert.Equal<int list> ([], testList)
 
-
     [<Fact>]
     let ``HListT.toHList returns the correct HList type`` () =
         let testHlist =
@@ -66,3 +65,11 @@ module TestHListT =
             |> TypeList.cons<float, _>
 
         Assert.Equal<Type list> (TypeList.toTypes expected, HList.toTypeList testHlist |> TypeList.toTypes)
+
+    [<Fact>]
+    let ``HListT.toHList on an empty HListT then getting the type list returns an empty list`` () =
+        let testHlist =
+            HListT.empty<int>
+            |> HListT.toHList
+
+        Assert.Equal<Type list> ([], HList.toTypeList testHlist |> TypeList.toTypes)
