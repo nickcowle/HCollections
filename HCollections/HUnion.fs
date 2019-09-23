@@ -34,7 +34,7 @@ module HUnion =
         }
         |> Value
 
-    let rec toTypeList<'ts> (union : 'ts HUnion) : 'ts TypeList =
+    let toTypeList<'ts> (union : 'ts HUnion) : 'ts TypeList =
         match union with
         | Value c ->
             c.Apply

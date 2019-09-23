@@ -20,7 +20,7 @@ type 'state HListFolder =
 
 module HList =
 
-    let rec toTypeList<'ts> (xs : 'ts HList) : 'ts TypeList =
+    let toTypeList<'ts> (xs : 'ts HList) : 'ts TypeList =
         match xs with
         | Empty teq ->
             TypeList.empty |> Teq.castFrom (teq |> TypeList.cong)
@@ -31,7 +31,7 @@ module HList =
 
     let empty = HList.Empty Teq.refl
 
-    let rec length<'ts> (xs : 'ts HList) : int =
+    let length<'ts> (xs : 'ts HList) : int =
         match xs with
         | Empty _ -> 0
         | Cons (_b, tl) -> TypeList.length tl

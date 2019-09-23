@@ -25,7 +25,7 @@ module HListT =
 
     let empty<'elem> : HListT<unit, 'elem> = HListT.Empty Teq.refl
 
-    let rec length<'ts, 'elem> (xs : HListT<'ts, 'elem>) : int =
+    let length<'ts, 'elem> (xs : HListT<'ts, 'elem>) : int =
         match xs with
         | Empty _ -> 0
         | Cons (_, length) -> length
