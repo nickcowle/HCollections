@@ -7,19 +7,20 @@ open TypeEquality
 type 'ts HUnion =
     private
     | Value of 'ts HUnionValueCrate
-    | Extended of 'ts HUnionExtendedCrate
+    /// For optimisation purposes, the Extended case contains a TypeList of all the entries of the union.
+    | Extended of 'ts HUnionExtendedCrate * 'ts TypeList
 
 and private HUnionValueEvaluator<'ts, 'ret> =
-    abstract member Eval<'t, 'ts2> : 't -> 'ts2 TypeList -> Teq<'ts, 't -> 'ts2> -> 'ret
+    abstract Eval<'t, 'ts2> : 't -> 'ts2 TypeList -> Teq<'ts, 't -> 'ts2> -> 'ret
 
 and private 'ts HUnionValueCrate =
-    abstract member Apply<'ret> : HUnionValueEvaluator<'ts, 'ret> -> 'ret
+    abstract Apply<'ret> : HUnionValueEvaluator<'ts, 'ret> -> 'ret
 
 and private HUnionExtendedEvaluator<'ts, 'ret> =
-    abstract member Eval<'t, 'ts2> : 'ts2 HUnion -> Teq<'ts, 't -> 'ts2> -> 'ret
+    abstract Eval<'t, 'ts2> : 'ts2 HUnion -> Teq<'ts, 't -> 'ts2> -> 'ret
 
 and private 'ts HUnionExtendedCrate =
-    abstract member Apply : HUnionExtendedEvaluator<'ts, 'ret> -> 'ret
+    abstract Apply : HUnionExtendedEvaluator<'ts, 'ret> -> 'ret
 
 [<RequireQualifiedAccess>]
 module HUnion =
@@ -33,11 +34,25 @@ module HUnion =
         }
         |> Value
 
+    let rec toTypeList<'ts> (union : 'ts HUnion) : 'ts TypeList =
+        match union with
+        | Value c ->
+            c.Apply
+                { new HUnionValueEvaluator<_,_> with
+                    member __.Eval _ ts teq =
+                        ts
+                        |> TypeList.cons
+                        |> Teq.castFrom (TypeList.cong teq)
+                }
+        | Extended (_c, tl) -> tl
+
     let extend<'t, 'ts> (union : 'ts HUnion) =
-        { new HUnionExtendedCrate<_> with
-            member __.Apply e = e.Eval union Teq.refl<'t -> 'ts>
-        }
-        |> Extended
+        let extension =
+            { new HUnionExtendedCrate<_> with
+                member __.Apply e = e.Eval union Teq.refl<'t -> 'ts>
+            }
+
+        Extended (extension, TypeList.cons<'t, 'ts> (toTypeList union))
 
     let split (union : ('t -> 'ts) HUnion) : Choice<'t, 'ts HUnion> =
         match union with
@@ -47,7 +62,7 @@ module HUnion =
                     member __.Eval v _ teq =
                         v |> Teq.castFrom (Teq.Cong.domainOf teq) |> Choice1Of2
                 }
-        | Extended c ->
+        | Extended (c, _) ->
             c.Apply
                 { new HUnionExtendedEvaluator<_,_> with
                     member __.Eval union teq =
@@ -65,21 +80,3 @@ module HUnion =
         | Extended _ ->
             raise Unreachable
 
-    let rec toTypeList<'ts> (union : 'ts HUnion) : 'ts TypeList =
-        match union with
-        | Value c ->
-            c.Apply
-                { new HUnionValueEvaluator<_,_> with
-                    member __.Eval _ ts teq =
-                        ts
-                        |> TypeList.cons
-                        |> Teq.castFrom (TypeList.cong teq)
-                }
-        | Extended c ->
-            c.Apply
-                { new HUnionExtendedEvaluator<_,_> with
-                    member __.Eval union teq =
-                        toTypeList union
-                        |> TypeList.cons
-                        |> Teq.castFrom (TypeList.cong teq)
-                }

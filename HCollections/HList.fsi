@@ -22,7 +22,7 @@ type 'state HListFolder =
     /// F takes the current state, the next element in the HList and returns a new state.
     /// Because elements in the HList may have arbitrary type, F must be generic on
     /// the element type, i.e. can be called for any element type.
-    abstract member Folder<'a> : 'state -> 'a -> 'state
+    abstract Folder<'a> : 'state -> 'a -> 'state
 
 module HList =
 
@@ -53,4 +53,5 @@ module HList =
 
     /// Given an HList, returns a TypeList whose types correspond to the values
     /// of the elements of the HList.
+    /// This operation takes time constant in the length of the HList.
     val toTypeList<'ts> : 'ts HList -> 'ts TypeList

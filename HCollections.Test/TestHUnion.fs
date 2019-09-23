@@ -30,3 +30,29 @@ module TestHUnion =
 
         let actual = testUnion |> HUnion.getSingleton
         Assert.Equal(1234, actual)
+
+    [<Fact>]
+    let ``toTypeList is correct on a union of size 1`` () =
+    
+        let union = testUnion
+        let expected : TypeList<int -> unit> = TypeList.empty |> TypeList.cons
+        Assert.Equal(expected, HUnion.toTypeList union)
+
+    [<Fact>]
+    let ``toTypeList is correct on a bigger union`` () =
+    
+        let union =
+            HUnion.make (TypeList.empty |> TypeList.cons<int, _> |> TypeList.cons<float, _>) ()
+            |> HUnion.extend<string, _>
+            |> HUnion.extend<float, _>
+
+        let expected : TypeList<float -> string -> unit -> float -> int -> unit> =
+            TypeList.empty
+            |> TypeList.cons
+            |> TypeList.cons
+            |> TypeList.cons
+            |> TypeList.cons
+            |> TypeList.cons
+
+        Assert.Equal(expected, HUnion.toTypeList union)
+
