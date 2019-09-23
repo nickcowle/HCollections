@@ -44,4 +44,5 @@ module HUnion =
 
     /// Given an HUnion, returns a TypeList whose types correspond to the
     /// cases of the HUnion.
+    /// This operation takes time constant in the size of the HUnion.
     val toTypeList : 'ts HUnion -> 'ts TypeList
