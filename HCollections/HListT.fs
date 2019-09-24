@@ -71,6 +71,45 @@ module HListT =
                         xs |> Teq.castFrom teq
                 }
 
+    let rec private toHList'<'ts, 'elem, 'k>
+        (input : HListT<'ts, 'elem>)
+        (cont : 'ts HList -> 'k)
+        : 'k
+        =
+        match input with
+        | HListT.Empty t -> HList.empty |> Teq.castFrom (HList.cong t) |> cont
+        | HListT.Cons (c,_) ->
+            c.Apply
+                { new HListTConsEvaluator<_,_,_> with
+                    member __.Eval<'t, 't2> (t : 't) _ (cons : HListT<'t2, 'elem>) teq =
+                        toHList'<'t2, 'elem, 'k>
+                            cons
+                            (fun ts ->
+                                HList.cons t ts
+                                |> Teq.castFrom (HList.cong teq)
+                                |> cont)
+                }
+
+    let rec toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
+        toHList'<'ts, 'elem, 'ts HList> input id
+
+    let rec private toList'<'ts, 'elem, 'k>
+        (current : HListT<'ts, 'elem>)
+        (cont : 'elem list -> 'k)
+        : 'k
+        =
+        match current with
+        | HListT.Empty _ -> cont []
+        | HListT.Cons (c, _) ->
+            c.Apply
+                { new HListTConsEvaluator<_,_,_> with
+                    member __.Eval<'t, 't2> (_ : 't) v (cons : HListT<'t2, 'elem>) teq =
+                        toList'<'t2, 'elem, 'k> cons (fun vs -> v :: vs |> cont)
+                }
+
+    let toList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'elem list =
+        toList'<'ts, 'elem, 'elem list> input id
+
     let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
         | Empty _ -> seed
