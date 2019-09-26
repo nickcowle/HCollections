@@ -46,11 +46,6 @@ module HListT =
         | Cons (_, elems, _) -> List.length elems
 
     let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
-        let tl =
-            xs
-            |> toTypeList
-            |> TypeList.cons<'t, _>
-
         match xs with
         | Empty (hlist, _) ->
             let cons =
@@ -91,7 +86,7 @@ module HListT =
     let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
         | Empty _ -> seed
-        | Cons ((hlist : 'ts HList), elems, cons) ->
+        | Cons (hlist, elems, cons) ->
             cons.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval xs teq =
