@@ -61,3 +61,9 @@ module HListT =
 
     /// Obtain the corresponding TypeList for the heterogeneous types in an HListT.
     val toTypeList<'ts, 'elem> : HListT<'ts, 'elem> -> TypeList<'ts>
+
+    /// Given an HListT, returns the corresponding HList of heterogeneous types
+    val toHList<'ts, 'elem> : HListT<'ts, 'elem> -> 'ts HList
+
+    /// Given an HListT, returns the corresponding list of homogenous types
+    val toList<'ts, 'elem> : HListT<'ts, 'elem> -> 'elem list
