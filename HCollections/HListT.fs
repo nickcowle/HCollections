@@ -7,7 +7,7 @@ open TypeEquality
 type HListT<'ts, 'elem> =
     private
     | Empty of 'ts HList * Teq<'ts, unit>
-    | Cons of 'ts HList * 'elem list * 'ts TypeList * HListTConsCrate<'ts, 'elem>
+    | Cons of 'ts HList * 'elem list * HListTConsCrate<'ts, 'elem>
 
 and private HListTConsEvaluator<'ts, 'elem, 'ret> =
     abstract member Eval<'t, 'ts2> : HListT<'ts2, 'elem> -> Teq<'ts, 't -> 'ts2> -> 'ret
@@ -25,27 +25,25 @@ module HListT =
 
     let toTypeList<'ts, 'elem> (list : HListT<'ts, 'elem>) : 'ts TypeList =
         match list with
-        | Empty (_, teq) ->
-            TypeList.empty
-            |> Teq.castFrom (TypeList.cong teq)
-        | Cons (_, _, tl, _) -> tl
+        | Empty (h, _)
+        | Cons (h, _, _) -> HList.toTypeList h
 
     let toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
         match input with
         | Empty (hlist, _)
-        | Cons (hlist, _, _, _) -> hlist
+        | Cons (hlist, _, _) -> hlist
 
     let toList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'elem list =
         match input with
         | Empty _ -> []
-        | Cons (_, elems, _, _) -> elems
+        | Cons (_, elems, _) -> elems
 
     let empty<'elem> : HListT<unit, 'elem> = HListT.Empty (HList.empty, Teq.refl)
 
     let length<'ts, 'elem> (xs : HListT<'ts, 'elem>) : int =
         match xs with
         | Empty _ -> 0
-        | Cons (_, _, tl, _) -> TypeList.length tl
+        | Cons (_, elems, _) -> List.length elems
 
     let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
         let tl =
@@ -60,8 +58,8 @@ module HListT =
                     member __.Apply e =
                         e.Eval xs Teq.refl
                 }
-            Cons (HList.cons x hlist, [elem], tl, cons)
-        | Cons (hlist, elems, _, cons) ->
+            Cons (HList.cons x hlist, [elem], cons)
+        | Cons (hlist, elems, cons) ->
             cons.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval tail t =
@@ -70,19 +68,19 @@ module HListT =
                                 member __.Apply e =
                                     e.Eval xs Teq.refl
                             }
-                        Cons (HList.cons x hlist, elem :: elems, tl, cons)
+                        Cons (HList.cons x hlist, elem :: elems, cons)
                 }
 
     let head (xs : HListT<'t -> 'ts, 'elem>) : 't * 'elem =
         match xs with
         | Empty _ -> raise Unreachable
-        | Cons (hlist, elems, _length, _cons) ->
+        | Cons (hlist, elems, _cons) ->
             HList.head hlist, List.head elems
 
     let tail (xs : HListT<'t -> 'ts, 'elem>) : HListT<'ts, 'elem> =
         match xs with
         | Empty _ -> raise Unreachable
-        | Cons (_, _, _length, cons) ->
+        | Cons (_, _, cons) ->
             cons.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval xs teq =
@@ -90,49 +88,10 @@ module HListT =
                         xs |> Teq.castFrom teq
                 }
 
-    let rec private toHList'<'ts, 'elem, 'k>
-        (input : HListT<'ts, 'elem>)
-        (cont : 'ts HList -> 'k)
-        : 'k
-        =
-        match input with
-        | HListT.Empty t -> HList.empty |> Teq.castFrom (HList.cong t) |> cont
-        | HListT.Cons (c,_) ->
-            c.Apply
-                { new HListTConsEvaluator<_,_,_> with
-                    member __.Eval<'t, 't2> (t : 't) _ (cons : HListT<'t2, 'elem>) teq =
-                        toHList'<'t2, 'elem, 'k>
-                            cons
-                            (fun ts ->
-                                HList.cons t ts
-                                |> Teq.castFrom (HList.cong teq)
-                                |> cont)
-                }
-
-    let rec toHList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'ts HList =
-        toHList'<'ts, 'elem, 'ts HList> input id
-
-    let rec private toList'<'ts, 'elem, 'k>
-        (current : HListT<'ts, 'elem>)
-        (cont : 'elem list -> 'k)
-        : 'k
-        =
-        match current with
-        | HListT.Empty _ -> cont []
-        | HListT.Cons (c, _) ->
-            c.Apply
-                { new HListTConsEvaluator<_,_,_> with
-                    member __.Eval<'t, 't2> (_ : 't) v (cons : HListT<'t2, 'elem>) teq =
-                        toList'<'t2, 'elem, 'k> cons (fun vs -> v :: vs |> cont)
-                }
-
-    let toList<'ts, 'elem> (input : HListT<'ts, 'elem>) : 'elem list =
-        toList'<'ts, 'elem, 'elem list> input id
-
     let rec fold<'state, 'ts, 'elem> (folder : HListTFolder<'state, 'elem>) (seed : 'state) (xs : HListT<'ts, 'elem>) : 'state =
         match xs with
         | Empty _ -> seed
-        | Cons ((hlist : 'ts HList), elems, _length, cons) ->
+        | Cons ((hlist : 'ts HList), elems, cons) ->
             cons.Apply
                 { new HListTConsEvaluator<_,_,_> with
                     member __.Eval xs teq =
