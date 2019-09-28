@@ -46,25 +46,15 @@ module HListT =
         | Cons (_, elems, _) -> List.length elems
 
     let cons<'t, 'ts, 'elem> (x : 't) (elem : 'elem) (xs : HListT<'ts, 'elem>) =
+        let cons =
+            { new HListTConsCrate<_, 'elem> with
+                member __.Apply e =
+                    e.Eval xs Teq.refl
+            }
         match xs with
-        | Empty (hlist, _) ->
-            let cons =
-                { new HListTConsCrate<_, 'elem> with
-                    member __.Apply e =
-                        e.Eval xs Teq.refl
-                }
-            Cons (HList.cons x hlist, [elem], cons)
-        | Cons (hlist, elems, cons) ->
-            cons.Apply
-                { new HListTConsEvaluator<_,_,_> with
-                    member __.Eval tail t =
-                        let cons =
-                            { new HListTConsCrate<_, 'elem> with
-                                member __.Apply e =
-                                    e.Eval xs Teq.refl
-                            }
-                        Cons (HList.cons x hlist, elem :: elems, cons)
-                }
+        | Empty (hlist, _) -> hlist, [elem]
+        | Cons (hlist, elems, _) -> hlist, elems
+        |> fun (hlist, elems) -> HListT.Cons (HList.cons x hlist, elems, cons)
 
     let head (xs : HListT<'t -> 'ts, 'elem>) : 't * 'elem =
         match xs with
