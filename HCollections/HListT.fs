@@ -51,10 +51,7 @@ module HListT =
                 member __.Apply e =
                     e.Eval xs Teq.refl
             }
-        match xs with
-        | Empty (hlist, _) -> hlist, []
-        | Cons (hlist, elems, _) -> hlist, elems
-        |> fun (hlist, elems) -> HListT.Cons (HList.cons x hlist, elem::elems, cons)
+        HListT.Cons (HList.cons x (toHList xs), elem::(toList xs), cons)
 
     let head (xs : HListT<'t -> 'ts, 'elem>) : 't * 'elem =
         match xs with
