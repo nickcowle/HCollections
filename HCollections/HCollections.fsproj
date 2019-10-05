@@ -33,11 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="TypeEquality" Version="0.2.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+    <PackageReference Include="TypeEquality" Version="0.2.3" />
   </ItemGroup>
 
 </Project>
