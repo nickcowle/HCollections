@@ -5,7 +5,7 @@
     <WarningLevel>5</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <Version>0.5.0</Version>
+    <Version>0.5.1</Version>
     <Authors>Nicholas Cowle</Authors>
     <Product>HCollections</Product>
     <Description>Heterogeneous collections for F#. Using heterogeneous collections, it's possible to act on arbitrary sum and product types in a generic way.</Description>
