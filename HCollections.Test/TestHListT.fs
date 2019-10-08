@@ -2,6 +2,8 @@
 
 open HCollections
 open System
+open TypeEquality
+open TypeEquality
 open Xunit
 
 module TestHListT =
@@ -73,3 +75,34 @@ module TestHListT =
             |> HListT.toHList
 
         Assert.Equal<Type list> ([], HList.toTypeList testHlist |> TypeList.toTypes)
+
+    [<Fact>]
+    let ``HListT.split on an empty HListT returns the proof that it's an empty HListT`` () =
+        let testHListT =
+            HListT.empty<int>
+        let result = HListT.split testHListT
+        match result with
+        | Choice1Of2 t -> Teq.castFrom t ()
+        | Choice2Of2 _ -> failwith "The HListT is not empty."
+
+    [<Fact>]
+    let ``HListT.split on a non-empty HListT returns the elements at the head of the HListT and the tail`` () =
+        let emptyHListT =
+            HListT.empty<int>
+        let testHListT =
+            emptyHListT
+            |> HListT.cons "hi" 4
+        let result = HListT.split testHListT
+        match result with
+        | Choice1Of2 _ -> failwith "The HListT is empty."
+        | Choice2Of2 c ->
+            c.Apply
+                { new HListTConsEvaluator<string -> unit,int,int> with
+                    member __.Eval (t,head,elem,tail) =
+                        let head = Teq.castFrom (Teq.Cong.domainOf t) head
+                        let tail = Teq.castFrom (HListT.cong (Teq.Cong.rangeOf t) Teq.refl) tail
+                        Assert.Equal<_> (emptyHListT, tail)
+                        Assert.Equal (elem, 4)
+                        Assert.Equal (head, "hi")
+                        5
+                } |> ignore
