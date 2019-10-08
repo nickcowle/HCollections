@@ -75,5 +75,5 @@ module HListT =
     val toList<'ts, 'elem> : HListT<'ts, 'elem> -> 'elem list
 
     /// Given an HListT, returns either a proof that the list is empty, or a crate
-    /// containing the head and the tail of the HListT.
+    /// containing the head elements (both the heterogenous and homogenous) and the tail of the HListT.
     val split : HListT<'ts, 'elem> -> Choice<Teq<'ts, unit>, HListTCons<'ts, 'elem>>
