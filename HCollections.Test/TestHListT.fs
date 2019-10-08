@@ -3,7 +3,6 @@
 open HCollections
 open System
 open TypeEquality
-open TypeEquality
 open Xunit
 
 module TestHListT =
