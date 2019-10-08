@@ -9,11 +9,17 @@ type 'ts HList =
     | Empty of Teq<'ts, unit>
     | Cons of 'ts HListConsCrate * 'ts TypeList
 
-and private HListConsEvaluator<'ts, 'ret> =
+and private HListConsEval<'ts, 'ret> =
     abstract Eval<'t, 'ts2> : 't -> 'ts2 HList -> Teq<'ts, 't -> 'ts2> -> 'ret
 
 and private 'ts HListConsCrate =
-    abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
+    abstract Apply<'ret> : HListConsEval<'ts, 'ret> -> 'ret
+
+type 'ts HListCons =
+    abstract Apply<'r> : HListConsEvaluator<'ts, 'r> -> 'r
+
+and HListConsEvaluator<'ts, 'r> =
+    abstract Eval<'t, 'u> : Teq<'ts, 't -> 'u> * 't * 'u HList -> 'r
 
 type 'state HListFolder =
     abstract Folder<'a> : 'state -> 'a -> 'state
@@ -50,7 +56,7 @@ module HList =
         | Empty _ -> raise Unreachable
         | Cons (b, _length) ->
             b.Apply
-                { new HListConsEvaluator<_,_> with
+                { new HListConsEval<_,_> with
                     member __.Eval x _ teq =
                         let teq = teq |> Teq.Cong.domainOf
                         x |> Teq.castFrom teq
@@ -61,7 +67,7 @@ module HList =
         | Empty _ -> raise Unreachable
         | Cons (b, _length) ->
             b.Apply
-                { new HListConsEvaluator<_,_> with
+                { new HListConsEval<_,_> with
                     member __.Eval _ xs teq =
                         let teq = teq |> Teq.Cong.rangeOf |> cong
                         xs |> Teq.castFrom teq
@@ -72,6 +78,17 @@ module HList =
         | Empty _ -> seed
         | Cons (c, _length) ->
             c.Apply
-                { new HListConsEvaluator<_,_> with
+                { new HListConsEval<_,_> with
                     member __.Eval x xs teq = fold folder (folder.Folder seed x) xs
+                }
+
+    let split (v : 'ts HList) : Choice<Teq<'ts, unit>, 'ts HListCons> =
+        match v with
+        | Empty ts -> Choice<_,_>.Choice1Of2 ts
+        | Cons (c,_) ->
+            c.Apply
+                { new HListConsEval<_,_> with
+                    member __.Eval<'t, 'u> head tail (ts : Teq<'ts, 't -> 'u>) =
+                        { new HListCons<_> with member __.Apply e = e.Eval (ts, head, tail) }
+                        |> Choice<_,_>.Choice2Of2
                 }
