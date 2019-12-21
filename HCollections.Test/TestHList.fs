@@ -57,12 +57,13 @@ module TestHList =
         match result with
         | Choice1Of2 _ -> failwith "The HListT is empty."
         | Choice2Of2 c ->
-            c.Apply
-                { new HListConsEvaluator<string -> unit,int> with
-                    member __.Eval (head,tail,t) =
-                        let head = Teq.castFrom (Teq.Cong.domainOf t) head
-                        let tail = Teq.castFrom (HList.cong (Teq.Cong.rangeOf t)) tail
-                        Assert.Equal<_> (emptyHList, tail)
-                        Assert.Equal (head, "hi")
-                        5
-                } |> ignore
+            let head,tail =
+                c.Apply
+                    { new HListConsEvaluator<string -> unit, string * unit HList> with
+                        member __.Eval (head,tail,t) =
+                            let head = Teq.castFrom (Teq.Cong.domainOf t) head
+                            let tail = Teq.castFrom (HList.cong (Teq.Cong.rangeOf t)) tail
+                            head,tail
+                    }
+            Assert.Equal<_> (tail, emptyHList)
+            Assert.Equal (head, "hi")
