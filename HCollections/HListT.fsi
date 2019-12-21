@@ -20,6 +20,9 @@ type HListT<'ts, 'elem>
 type HListTCons<'ts, 'elem> =
     abstract Apply<'r> : HListTConsEvaluator<'ts, 'elem, 'r> -> 'r
 
+/// Contains the head (both heterogenous and homogenous elements) and the tail of the HListT.
+/// The arguments of this crate a tupled due to an issue where recursing through crates with 3 or more
+/// un-tupled arguments will result in non-tail recursive calls.
 and HListTConsEvaluator<'ts, 'elem, 'r> =
     abstract Eval<'t, 'u> : 't * 'elem * HListT<'u, 'elem> * Teq<'ts, 't -> 'u> -> 'r
 

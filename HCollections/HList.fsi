@@ -14,6 +14,9 @@ open TypeEquality
 [<NoEquality>]
 type 'ts HList
 
+/// Contains the head and the tail of the HList.
+/// The arguments of this crate a tupled due to an issue where recursing through crates with 3 or more
+/// un-tupled arguments will result in non-tail recursive calls.
 type HListConsEvaluator<'ts, 'ret> =
     abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
 
