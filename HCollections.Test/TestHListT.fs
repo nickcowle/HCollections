@@ -97,7 +97,7 @@ module TestHListT =
         | Choice2Of2 c ->
             c.Apply
                 { new HListTConsEvaluator<string -> unit,int,int> with
-                    member __.Eval (t,head,elem,tail) =
+                    member __.Eval (head,elem,tail,t) =
                         let head = Teq.castFrom (Teq.Cong.domainOf t) head
                         let tail = Teq.castFrom (HListT.cong (Teq.Cong.rangeOf t) Teq.refl) tail
                         Assert.Equal<_> (emptyHListT, tail)

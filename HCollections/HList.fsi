@@ -14,11 +14,11 @@ open TypeEquality
 [<NoEquality>]
 type 'ts HList
 
-type 'ts HListCons =
-    abstract Apply<'r> : HListConsEvaluator<'ts, 'r> -> 'r
+type HListConsEvaluator<'ts, 'ret> =
+    abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
 
-and HListConsEvaluator<'ts, 'r> =
-    abstract Eval<'t, 'u> : Teq<'ts, 't -> 'u> * 't * 'u HList -> 'r
+type 'ts HListConsCrate =
+    abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
 
 /// HListFolder allows you to perform a fold over an HList.
 /// The single type parameter, 'state, denotes the type of the value
@@ -64,4 +64,4 @@ module HList =
 
     /// Given an HList, returns either a proof that the list is empty, or a crate
     /// containing the head and the tail of the HList.
-    val split : 'ts HList -> Choice<Teq<'ts, unit>, 'ts HListCons>
+    val split : 'ts HList -> Choice<Teq<'ts, unit>, 'ts HListConsCrate>

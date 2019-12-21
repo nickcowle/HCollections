@@ -19,7 +19,7 @@ type HListTCons<'ts, 'elem> =
     abstract Apply<'r> : HListTConsEvaluator<'ts, 'elem, 'r> -> 'r
 
 and HListTConsEvaluator<'ts, 'elem, 'r> =
-    abstract Eval<'t, 'u> : Teq<'ts, 't -> 'u> * 't * 'elem * HListT<'u, 'elem> -> 'r
+    abstract Eval<'t, 'u> : 't * 'elem * HListT<'u, 'elem> * Teq<'ts, 't -> 'u> -> 'r
 
 type HListTFolder<'state, 'elem> =
     abstract member Folder<'a> : 'state -> 'a -> 'elem -> 'state
@@ -98,6 +98,6 @@ module HListT =
                         let hlist = Teq.castTo (HList.cong t) hlist
                         let hlistHead = HList.head hlist
                         let elemHead = List.head elems
-                        { new HListTCons<_,_> with member __.Apply e = e.Eval (t, hlistHead, elemHead, tail) }
+                        { new HListTCons<_,_> with member __.Apply e = e.Eval (hlistHead, elemHead, tail, t) }
                         |> Choice<_,_>.Choice2Of2
                 }

@@ -21,7 +21,7 @@ type HListTCons<'ts, 'elem> =
     abstract Apply<'r> : HListTConsEvaluator<'ts, 'elem, 'r> -> 'r
 
 and HListTConsEvaluator<'ts, 'elem, 'r> =
-    abstract Eval<'t, 'u> : Teq<'ts, 't -> 'u> * 't * 'elem * HListT<'u, 'elem> -> 'r
+    abstract Eval<'t, 'u> : 't * 'elem * HListT<'u, 'elem> * Teq<'ts, 't -> 'u> -> 'r
 
 /// HListFolder allows you to perform a fold over an HListT.
 /// The first type parameter, 'state, denotes the type of the value
