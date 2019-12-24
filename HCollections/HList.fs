@@ -9,12 +9,11 @@ type 'ts HList =
     | Empty of Teq<'ts, unit>
     | Cons of 'ts HListCons * 'ts TypeList
 
-and HListConsEvaluator<'ts, 'ret> =
-    abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
-
 and 'ts HListCons =
     abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
 
+and HListConsEvaluator<'ts, 'ret> =
+    abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
 
 type 'state HListFolder =
     abstract Folder<'a> : 'state -> 'a -> 'state

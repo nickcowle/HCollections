@@ -14,14 +14,14 @@ open TypeEquality
 [<NoEquality>]
 type 'ts HList
 
+type 'ts HListCons =
+    abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
+
 /// Contains the head and the tail of the HList.
 /// The arguments of this crate a tupled due to an issue where recursing through crates with 3 or more
 /// un-tupled arguments will result in non-tail recursive calls.
-type HListConsEvaluator<'ts, 'ret> =
+and HListConsEvaluator<'ts, 'ret> =
     abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
-
-type 'ts HListCons =
-    abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
 
 /// HListFolder allows you to perform a fold over an HList.
 /// The single type parameter, 'state, denotes the type of the value
