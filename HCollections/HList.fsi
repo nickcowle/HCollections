@@ -20,7 +20,7 @@ type 'ts HList
 type HListConsEvaluator<'ts, 'ret> =
     abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
 
-type 'ts HListConsCrate =
+type 'ts HListCons =
     abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
 
 /// HListFolder allows you to perform a fold over an HList.
@@ -67,4 +67,4 @@ module HList =
 
     /// Given an HList, returns either a proof that the list is empty, or a crate
     /// containing the head and the tail of the HList.
-    val split : 'ts HList -> Choice<Teq<'ts, unit>, 'ts HListConsCrate>
+    val split : 'ts HList -> Choice<Teq<'ts, unit>, 'ts HListCons>

@@ -7,12 +7,12 @@ open TypeEquality
 type 'ts HList =
     private
     | Empty of Teq<'ts, unit>
-    | Cons of 'ts HListConsCrate * 'ts TypeList
+    | Cons of 'ts HListCons * 'ts TypeList
 
 and HListConsEvaluator<'ts, 'ret> =
     abstract Eval<'t, 'ts2> : 't * 'ts2 HList * Teq<'ts, 't -> 'ts2> -> 'ret
 
-and 'ts HListConsCrate =
+and 'ts HListCons =
     abstract Apply<'ret> : HListConsEvaluator<'ts, 'ret> -> 'ret
 
 
@@ -39,7 +39,7 @@ module HList =
 
     let cons (x : 't) (xs : 'ts HList) =
         let crate = 
-            { new HListConsCrate<_> with
+            { new HListCons<_> with
                 member __.Apply e = e.Eval (x, xs, Teq.refl)
             }
         let tl = TypeList.cons<'t, 'ts> (toTypeList xs)
@@ -77,13 +77,13 @@ module HList =
                     member __.Eval (x, xs, teq) = fold folder (folder.Folder seed x) xs
                 }
 
-    let split (v : 'ts HList) : Choice<Teq<'ts, unit>, 'ts HListConsCrate> =
+    let split (v : 'ts HList) : Choice<Teq<'ts, unit>, 'ts HListCons> =
         match v with
         | Empty ts -> Choice<_,_>.Choice1Of2 ts
         | Cons (c,_) ->
             c.Apply
                 { new HListConsEvaluator<_,_> with
                     member __.Eval<'t, 'u> (head, tail, (ts : Teq<'ts, 't -> 'u>)) =
-                        { new HListConsCrate<_> with member __.Apply e = e.Eval (head, tail, ts) }
+                        { new HListCons<_> with member __.Apply e = e.Eval (head, tail, ts) }
                         |> Choice<_,_>.Choice2Of2
                 }
