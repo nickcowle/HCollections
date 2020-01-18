@@ -1,7 +1,7 @@
 language: csharp
 solution: HCollections.sln
 
-dotnet: 2.1.15
+dotnet: 2.2.301
 
 script:
     - dotnet restore
