@@ -9,11 +9,17 @@ type HListT<'ts, 'elem> =
     | Empty of 'ts HList * Teq<'ts, unit>
     | Cons of 'ts HList * 'elem list * HListTConsCrate<'ts, 'elem>
 
-and private HListTConsEvaluator<'ts, 'elem, 'ret> =
+and private HListTConsEval<'ts, 'elem, 'ret> =
     abstract member Eval<'t, 'ts2> : HListT<'ts2, 'elem> -> Teq<'ts, 't -> 'ts2> -> 'ret
 
 and private HListTConsCrate<'ts, 'elem> =
-    abstract member Apply<'ret> : HListTConsEvaluator<'ts, 'elem, 'ret> -> 'ret
+    abstract member Apply<'ret> : HListTConsEval<'ts, 'elem, 'ret> -> 'ret
+
+type HListTCons<'ts, 'elem> =
+    abstract Apply<'r> : HListTConsEvaluator<'ts, 'elem, 'r> -> 'r
+
+and HListTConsEvaluator<'ts, 'elem, 'r> =
+    abstract Eval<'t, 'u> : 't * 'elem * HListT<'u, 'elem> * Teq<'ts, 't -> 'u> -> 'r
 
 type HListTFolder<'state, 'elem> =
     abstract member Folder<'a> : 'state -> 'a -> 'elem -> 'state
@@ -64,7 +70,7 @@ module HListT =
         | Empty _ -> raise Unreachable
         | Cons (_, _, cons) ->
             cons.Apply
-                { new HListTConsEvaluator<_,_,_> with
+                { new HListTConsEval<_,_,_> with
                     member __.Eval xs teq =
                         let teq = cong (teq |> Teq.Cong.rangeOf) Teq.refl
                         xs |> Teq.castFrom teq
@@ -75,9 +81,23 @@ module HListT =
         | Empty _ -> seed
         | Cons (hlist, elems, cons) ->
             cons.Apply
-                { new HListTConsEvaluator<_,_,_> with
+                { new HListTConsEval<_,_,_> with
                     member __.Eval xs teq =
                         let x = HList.head (hlist |> Teq.castTo (HList.cong teq))
                         let y = List.head elems
                         fold folder (folder.Folder seed x y) xs
+                }
+
+    let split (v : HListT<'ts, 'elem>) : Choice<Teq<'ts, unit>, HListTCons<'ts, 'elem>> =
+        match v with
+        | Empty (_, t) -> Choice<_,_>.Choice1Of2 t
+        | Cons (hlist, elems, next) ->
+            next.Apply
+                { new HListTConsEval<_,_,_> with
+                    member __.Eval tail t =
+                        let hlist = Teq.castTo (HList.cong t) hlist
+                        let hlistHead = HList.head hlist
+                        let elemHead = List.head elems
+                        { new HListTCons<_,_> with member __.Apply e = e.Eval (hlistHead, elemHead, tail, t) }
+                        |> Choice<_,_>.Choice2Of2
                 }

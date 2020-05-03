@@ -17,6 +17,15 @@ open TypeEquality
 [<NoEquality>]
 type HListT<'ts, 'elem>
 
+type HListTCons<'ts, 'elem> =
+    abstract Apply<'r> : HListTConsEvaluator<'ts, 'elem, 'r> -> 'r
+
+/// Contains the head (both heterogenous and homogenous elements) and the tail of the HListT.
+/// The arguments of this crate a tupled due to an issue where recursing through crates with 3 or more
+/// un-tupled arguments will result in non-tail recursive calls.
+and HListTConsEvaluator<'ts, 'elem, 'r> =
+    abstract Eval<'t, 'u> : 't * 'elem * HListT<'u, 'elem> * Teq<'ts, 't -> 'u> -> 'r
+
 /// HListFolder allows you to perform a fold over an HListT.
 /// The first type parameter, 'state, denotes the type of the value
 /// that you want the fold to return.
@@ -67,3 +76,7 @@ module HListT =
 
     /// Given an HListT, returns the corresponding list of homogenous types
     val toList<'ts, 'elem> : HListT<'ts, 'elem> -> 'elem list
+
+    /// Given an HListT, returns either a proof that the list is empty, or a crate
+    /// containing the head elements (both the heterogenous and homogenous) and the tail of the HListT.
+    val split : HListT<'ts, 'elem> -> Choice<Teq<'ts, unit>, HListTCons<'ts, 'elem>>
